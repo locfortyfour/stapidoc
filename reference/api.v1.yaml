@@ -1,0 +1,378 @@
+openapi: 3.0.0
+info:
+  title: API接口
+  version: '1.0'
+  description: 扫码进入页面后，提取query参数`v`作为唯一的`code`，请求扫码接口。
+servers:
+  - url: 'https://stuapi.ruanlianxiamen.cn'
+    description: endpoint
+paths:
+  '/consumptions/{code}':
+    parameters:
+      - type: string
+        name: code
+        in: path
+        required: true
+        description: 页面带过来的query参数v
+        schema:
+          type: string
+    get:
+      summary: 获取扫码结果
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 错误码，正确请求时code=0
+                  msg:
+                    type: string
+                    description: 错误描述信息
+                  data:
+                    type:
+                      - 'null'
+                      - object
+                    required:
+                      - material
+                      - security_code
+                    description: 扫码结果
+                    properties:
+                      material:
+                        type: object
+                        required:
+                          - id
+                          - merchant
+                          - name
+                          - barcode
+                          - brief
+                          - origin
+                          - production_date
+                          - photos
+                          - created_at
+                        description: 商品信息
+                        properties:
+                          id:
+                            type: integer
+                            description: 商品ID
+                          merchant:
+                            type: object
+                            required:
+                              - id
+                              - name
+                              - address
+                              - brief
+                              - logo
+                              - telephone
+                              - email
+                              - wechat_subscription
+                              - wechat_redirect
+                            description: 商家信息
+                            properties:
+                              id:
+                                type: integer
+                                description: 商家ID
+                              name:
+                                type: string
+                                description: 商家名称
+                              address:
+                                type: string
+                                description: 商家地址
+                              brief:
+                                type: string
+                                description: 商家简介，富文本
+                              logo:
+                                type: string
+                                description: 商家logo
+                              telephone:
+                                type: string
+                                description: 联系电话
+                              email:
+                                type: string
+                                description: 联系邮箱
+                              wechat_subscription:
+                                type: string
+                                description: 微信公众号
+                              wechat_redirect:
+                                type: string
+                                description: 微信公众号关注链接
+                          name:
+                            type: string
+                            description: 商品名称
+                          barcode:
+                            type: string
+                            description: 条形码
+                          brief:
+                            type: string
+                            description: 商品简介，富文本
+                          origin:
+                            type: string
+                            description: 产地
+                          production_date:
+                            type: string
+                            description: 生产日期
+                          photos:
+                            type: array
+                            description: 商品轮播图片
+                            items:
+                              type: string
+                          created_at:
+                            type: integer
+                            description: 添加时间（秒时间戳）
+                      participate:
+                        $ref: '#/components/schemas/Participate'
+                      activity:
+                        type:
+                          - 'null'
+                          - object
+                        description: 活动信息
+                        properties:
+                          title:
+                            type: string
+                            description: 活动标题
+                          type:
+                            $ref: '#/components/schemas/ActivityType'
+                          least:
+                            type: integer
+                            description: 最少积分数
+                          most:
+                            type: integer
+                            description: 最多积分数
+                          total_number:
+                            type: integer
+                            description: 总数量
+                          lottery_times:
+                            type: integer
+                            description: 抽奖次数
+                          prizes:
+                            type:
+                              - 'null'
+                              - array
+                            description: 奖品
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: integer
+                                  description: 奖品ID
+                                name:
+                                  type: string
+                                  description: 奖品名称
+                                type:
+                                  $ref: '#/components/schemas/PrizeType'
+                      security_code:
+                        type: string
+                        description: 鉴真码
+                required:
+                  - code
+                  - data
+      operationId: get-consumptions-code
+      description: 获取扫码结果
+  '/participates/{code}':
+    parameters:
+      - type: string
+        name: code
+        in: path
+        required: true
+    post:
+      summary: 参与活动
+      operationId: post-participates-code
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 错误码
+                  msg:
+                    type: string
+                    description: 错误信息
+                  data:
+                    $ref: '#/components/schemas/Participate'
+                required:
+                  - code
+                  - msg
+      description: 参与活动
+      requestBody: {}
+  '/verifications/{code}':
+    parameters:
+      - type: string
+        name: code
+        in: path
+        required: true
+    post:
+      summary: 验证真伪
+      operationId: post-verifications-code
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 错误码
+                  msg:
+                    type: string
+                    description: 错误信息
+                  data:
+                    $ref: '#/components/schemas/Verification'
+                required:
+                  - code
+                  - msg
+      description: 鉴真
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                security_code:
+                  type: string
+                  description: 鉴真码
+              required:
+                - security_code
+  /wechat/jsconfig:
+    post:
+      summary: 获取微信公众号JS Config
+      operationId: post-wechat-jsconfig
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 错误码
+                  msg:
+                    type: string
+                    description: 错误信息
+                  data:
+                    $ref: '#/components/schemas/WXJSConfig'
+                required:
+                  - code
+                  - msg
+      description: 获取微信jsconfig
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                  description: 页面链接
+              required:
+                - url
+        description: ''
+components:
+  schemas:
+    PrizeType:
+      type: integer
+      description: |-
+        奖品类型
+        1 积分奖品
+        2 实物奖品
+    ActivityType:
+      type: integer
+      title: ActivityType
+      description: |-
+        活动类型
+        1 固定积分
+        2 随机积分
+        3 抽奖
+      format: int32
+    Participate:
+      title: Participate
+      type: object
+      properties:
+        mobile:
+          type: string
+          description: 参与手机号
+        activity_type:
+          $ref: '#/components/schemas/ActivityType'
+        times:
+          type: integer
+          description: 可参与次数
+        last_times:
+          type: integer
+          description: 剩余可参与次数
+        integral:
+          type: integer
+          description: 积分数量
+        prize_id:
+          type: integer
+          description: 奖品ID
+        prize_name:
+          type: string
+          description: 奖品名称
+        prize_type:
+          $ref: '#/components/schemas/PrizeType'
+      required:
+        - mobile
+        - activity_type
+        - times
+        - last_times
+        - integral
+        - prize_id
+        - prize_name
+      description: 活动参与信息
+    Verification:
+      title: Verification
+      type: object
+      description: 鉴真结果
+      properties:
+        ip:
+          type: string
+          description: IP地址
+        times:
+          type: string
+          description: 验证次数
+        security_code:
+          type: string
+          description: 鉴真码
+        last_time_at:
+          type: string
+          description: 上次鉴真时间
+        success:
+          type: boolean
+          description: 是否成功
+      required:
+        - ip
+        - times
+        - security_code
+        - last_time_at
+        - success
+    WXJSConfig:
+      title: WXJSConfig
+      type: object
+      properties:
+        appId:
+          type: string
+          description: 公众号APPID
+        timestamp:
+          type: integer
+          description: 时间戳
+        nonceStr:
+          type: string
+        signature:
+          type: string
+        jsApiList:
+          type: string
+      required:
+        - appId
+        - timestamp
+      description: 微信公众号JS Config
